@@ -7,9 +7,11 @@ public class MovementController : MonoBehaviour
     [SerializeField] private Transform[] points;
     [SerializeField] private AnimationCurve speedCurve;
     [SerializeField] private float speed;
+    [SerializeField] private float timeToWaitAtStop = 5f;
     Vector3 prevPos;
     private int i = 0;
     private float t;
+    private bool canContinue = true;
 
     // Start is called before the first frame update
     void Start()
@@ -26,25 +28,33 @@ public class MovementController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        t += Time.deltaTime * (speedCurve.Evaluate(t) * (1/speed));
-
-        if(t >= 1)
+        if (canContinue)
         {
-            t = 0;
-            i = (i + 1) % points.Length;
+            t += Time.deltaTime * (speedCurve.Evaluate(t) * (1 / speed));
+
+            if (t >= 1)
+            {
+                t = 0;
+                i = (i + 1) % points.Length;
+                if (points[i].gameObject.tag == "Station")
+                {
+                    canContinue = false;
+                    StartCoroutine(WaitForTime(timeToWaitAtStop));
+                }
+            }
+            Vector3 p0 = points[(i - 1 + points.Length) % points.Length].position;
+            Vector3 p1 = points[i].position;
+            Vector3 p2 = points[(i + 1 + points.Length) % points.Length].position;
+            Vector3 p3 = points[(i + 2 + points.Length) % points.Length].position;
+
+
+            Vector3 nextPos = GetSplinePos(p0, p1, p2, p3, t);
+            Vector3 nextDir = GetSplinePos(p0, p1, p2, p3, t + 0.1f);
+            prevPos = transform.position;
+            transform.LookAt(nextDir);
+            transform.position = nextPos;
+
         }
-        Vector3 p0 = points[(i - 1 + points.Length) % points.Length].position;
-        Vector3 p1 = points[i].position;
-        Vector3 p2 = points[(i + 1 + points.Length) % points.Length].position;
-        Vector3 p3 = points[(i + 2 + points.Length) % points.Length].position;
-
- 
-        Vector3 nextPos = GetSplinePos(p0, p1, p2, p3, t);
-        Vector3 nextDir = GetSplinePos(p0, p1, p2, p3, t + 0.1f);
-        prevPos = transform.position;
-        transform.LookAt(nextDir);
-        transform.position = nextPos;
-
     }
 
     Vector3 GetSplinePos(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
@@ -66,5 +76,11 @@ public class MovementController : MonoBehaviour
 
         return 0.5f * a * t + b * t + 1.5f * c * t * t;
 
+    }
+
+    IEnumerator WaitForTime(float time)
+    {
+        yield return new WaitForSeconds(time);
+        canContinue = true;
     }
 }

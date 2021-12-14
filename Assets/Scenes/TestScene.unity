@@ -479,6 +479,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   speed: 5
+  timeToWaitAtStop: 5
 --- !u!65 &1154815327
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -569,7 +570,7 @@ GameObject:
   - component: {fileID: 1163201472}
   m_Layer: 0
   m_Name: Sphere (2)
-  m_TagString: Untagged
+  m_TagString: Station
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
